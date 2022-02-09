@@ -34,7 +34,7 @@ class Article
 
     public function __construct()
     {
-        $this->$this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getName(): ?string
