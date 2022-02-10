@@ -13,13 +13,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Table(name="`user`")
  * @ApiResource()
  */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use ResourceId;
-    use Timestapable;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
@@ -37,15 +37,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private string $password;
 
+
     /**
      * @ORM\OneToMany(targetEntity=Article::class, mappedBy="author", orphanRemoval=true)
      */
     private Collection $articles;
 
+    /**
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $updatedAt;
+
     public function __construct()
     {
         $this->articles = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function preUpdate(): void
+    {
+       $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getEmail(): ?string
@@ -158,6 +173,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $article->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
